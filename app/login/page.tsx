@@ -44,10 +44,12 @@ export default function LoginPage() {
                         <label htmlFor="email">メールアドレス</label>
                         <input
                             id="email"
+                            name="email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="email@example.com"
+                            autoComplete="username"
                             required
                         />
                     </div>
@@ -55,10 +57,12 @@ export default function LoginPage() {
                         <label htmlFor="password">パスワード</label>
                         <input
                             id="password"
+                            name="password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
+                            autoComplete="current-password"
                             required
                         />
                     </div>
