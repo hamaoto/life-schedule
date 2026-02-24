@@ -39,7 +39,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Publicly accessible paths
-    const publicPaths = ['/login', '/signup', '/landing', '/privacy', '/terms', '/doc'];
+    const publicPaths = ['/login', '/signup', '/landing', '/privacy', '/terms', '/doc', '/auth/callback', '/forgot-password', '/reset-password'];
     const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path)) ||
         request.nextUrl.pathname === '/';
 
