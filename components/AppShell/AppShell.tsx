@@ -9,14 +9,15 @@ import './AppShell.css';
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const isAuthPage = pathname === '/login' || pathname === '/signup';
+    const publicPaths = ['/login', '/signup', '/landing', '/privacy', '/terms', '/forgot-password', '/reset-password'];
+    const isPublicPage = publicPaths.some(path => pathname.startsWith(path)) || pathname === '/';
 
     // Close sidebar on navigation (mobile)
     useEffect(() => {
         setIsSidebarOpen(false);
     }, [pathname]);
 
-    if (isAuthPage) {
+    if (isPublicPage) {
         return <>{children}</>;
     }
 
