@@ -1,0 +1,43 @@
+/* Doc page styles */
+
+.doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.doc-card {
+    display: block;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.doc-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+    transform: translateY(-1px);
+}
+
+.doc-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.doc-card-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.doc-empty {
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
+}

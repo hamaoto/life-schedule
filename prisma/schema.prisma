@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id        String  @id @default(cuid())
+  userId    String  @unique // Supabase auth user ID
+  birthYear Int?    // Optional birth year for age display
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String @id @default(cuid())
+  name      String // "生存基盤", "キャリア" etc.
+  subName   String // "Foundation", "Career" etc.
+  sortOrder Int
+  cells     Cell[]
+}
+
+model Sheet {
+  id       String  @id @default(cuid())
+  userId   String  // Supabase auth user ID
+  level    String  // "life" | "phase" | "year" | "quarter" | "month" | "week"
+  year     Int     // e.g. 2026
+  period   Int     // year:0, quarter:1-3, month:1-12, week:1-60
+  label    String? // Display label
+
+  parentId String?
+  parent   Sheet?  @relation("SheetHierarchy", fields: [parentId], references: [id])
+  children Sheet[] @relation("SheetHierarchy")
+
+  cells Cell[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, level, year, period])
+}
+
+model Cell {
+  id         String  @id @default(cuid())
+  sheetId    String
+  sheet      Sheet   @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  columnKey  String  // "plan","indicator","do","check","action"
+
+  content    String?
+  checked    Boolean @default(false)
+
+  updatedAt  DateTime @updatedAt
+
+  @@unique([sheetId, categoryId, columnKey])
+}
+
+model DocLink {
+  id          String  @id @default(cuid())
+  userId      String  // Supabase auth user ID
+  title       String
+  url         String
+  description String?
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+}
