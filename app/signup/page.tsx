@@ -42,15 +42,7 @@ export default function SignupPage() {
         } else {
             setSuccess(true);
             setLoading(false);
-            // Auto-login after signup
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-            if (!signInError) {
-                router.push('/');
-                router.refresh();
-            }
+            // No auto-login since email verification is required
         }
     }
 
@@ -63,7 +55,10 @@ export default function SignupPage() {
 
                 {success ? (
                     <div className="auth-success">
-                        <p>登録完了！リダイレクト中...</p>
+                        <p>登録完了！メールを確認してください。</p>
+                        <p style={{ fontSize: '14px', marginTop: '8px', color: '#64748b' }}>
+                            確認メールを送信しました。リンクをクリックして認証を完了してください。
+                        </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSignup} className="auth-form">
