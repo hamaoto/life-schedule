@@ -38,24 +38,32 @@ export async function proxy(request: NextRequest) {
         return supabaseResponse;
     }
 
-    // Allow access to login and signup pages
-    const isAuthPage =
-        request.nextUrl.pathname.startsWith('/login') ||
-        request.nextUrl.pathname.startsWith('/signup');
+    // Publicly accessible paths
+    const publicPaths = ['/login', '/signup', '/landing', '/privacy', '/terms', '/doc'];
+    const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path)) ||
+        request.nextUrl.pathname === '/';
 
-    if (!user && !isAuthPage) {
+    if (!user && !isPublicPath) {
         const url = request.nextUrl.clone();
-        url.pathname = '/login';
+        url.pathname = '/landing';
         return NextResponse.redirect(url);
     }
 
-    if (user && isAuthPage) {
-        const url = request.nextUrl.clone();
-        const now = new Date();
-        const month = now.getMonth() + 1;
-        const weekPeriod = (month - 1) * 5 + Math.min(Math.ceil(now.getDate() / 7), 5);
-        url.pathname = `/sheet/week/${now.getFullYear()}/${weekPeriod}`;
-        return NextResponse.redirect(url);
+    if (user) {
+        // Redirect from landing/login/signup to dashboard
+        const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
+            request.nextUrl.pathname.startsWith('/signup');
+        const isLandingPage = request.nextUrl.pathname === '/' ||
+            request.nextUrl.pathname === '/landing';
+
+        if (isAuthPage || isLandingPage) {
+            const url = request.nextUrl.clone();
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const weekPeriod = (month - 1) * 5 + Math.min(Math.ceil(now.getDate() / 7), 5);
+            url.pathname = `/sheet/week/${now.getFullYear()}/${weekPeriod}`;
+            return NextResponse.redirect(url);
+        }
     }
 
     return supabaseResponse;

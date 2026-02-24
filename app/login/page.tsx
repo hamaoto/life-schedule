@@ -65,6 +65,9 @@ export default function LoginPage() {
                             autoComplete="current-password"
                             required
                         />
+                        <div className="forgot-password-link">
+                            <a href="/forgot-password">パスワードをお忘れですか？</a>
+                        </div>
                     </div>
 
                     {error && <div className="auth-error">{error}</div>}

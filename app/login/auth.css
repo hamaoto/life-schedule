@@ -142,3 +142,20 @@
 .auth-link a:hover {
     text-decoration: underline;
 }
+
+.forgot-password-link {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+}
+
+.forgot-password-link a {
+    font-size: 13px;
+    color: #64748b;
+    text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}
