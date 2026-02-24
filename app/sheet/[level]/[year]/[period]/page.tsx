@@ -49,9 +49,11 @@ export default function SheetPage() {
     const [parentPlan, setParentPlan] = useState<ParentPlanData | null>(null);
     const [birthYear, setBirthYear] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchSheet = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const res = await fetch(`/api/sheet?level=${level}&year=${year}&period=${period}`);
             if (!res.ok) {
@@ -59,7 +61,9 @@ export default function SheetPage() {
                     window.location.href = '/login';
                     return;
                 }
-                console.error('API error:', res.status);
+                const errorData = await res.json().catch(() => ({}));
+                console.error('API error:', res.status, errorData);
+                setError(`APIエラー (${res.status}): ${errorData.detail || errorData.error || '不明なエラー'}`);
                 return;
             }
             const data = await res.json();
@@ -69,6 +73,7 @@ export default function SheetPage() {
             setBirthYear(data.birthYear || null);
         } catch (err) {
             console.error('Failed to fetch sheet:', err);
+            setError('ネットワークエラー: サーバーに接続できません');
         } finally {
             setLoading(false);
         }
@@ -304,7 +309,14 @@ export default function SheetPage() {
     }
 
     if (!sheet) {
-        return <div>シートが見つかりません</div>;
+        return (
+            <div className="loading-container">
+                <p>{error || 'シートの読み込みに失敗しました'}</p>
+                <button onClick={fetchSheet} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                    再読み込み
+                </button>
+            </div>
+        );
     }
 
     const sheetLabel = getSheetLabel(level, year, period);

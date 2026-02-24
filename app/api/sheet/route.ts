@@ -7,121 +7,127 @@ export const dynamic = 'force-dynamic';
 
 // GET /api/sheet?level=week&year=2026&period=8
 export async function GET(req: NextRequest) {
-    // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const userId = user.id;
+    try {
+        // Get authenticated user
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            console.error('Auth error:', authError?.message || 'No user');
+            return NextResponse.json({ error: 'Unauthorized', detail: authError?.message }, { status: 401 });
+        }
+        const userId = user.id;
 
-    const { searchParams } = new URL(req.url);
-    const level = searchParams.get('level') || 'week';
-    const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
-    const period = parseInt(searchParams.get('period') || '0');
+        const { searchParams } = new URL(req.url);
+        const level = searchParams.get('level') || 'week';
+        const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
+        const period = parseInt(searchParams.get('period') || '0');
 
-    // Find or create sheet (scoped to user)
-    let sheet = await prisma.sheet.findUnique({
-        where: { userId_level_year_period: { userId, level, year, period } },
-        include: { cells: true },
-    });
+        // Find or create sheet (scoped to user)
+        let sheet = await prisma.sheet.findUnique({
+            where: { userId_level_year_period: { userId, level, year, period } },
+            include: { cells: true },
+        });
 
-    if (!sheet) {
-        // Find parent sheet
-        let parentId: string | null = null;
-        if (level === 'phase') {
-            const parent = await prisma.sheet.findUnique({
-                where: { userId_level_year_period: { userId, level: 'life', year: 0, period: 0 } },
+        if (!sheet) {
+            // Find parent sheet
+            let parentId: string | null = null;
+            if (level === 'phase') {
+                const parent = await prisma.sheet.findUnique({
+                    where: { userId_level_year_period: { userId, level: 'life', year: 0, period: 0 } },
+                });
+                parentId = parent?.id || null;
+            } else if (level === 'year') {
+                const baseYear = new Date().getFullYear();
+                const phaseStart = year - ((year - baseYear) % 3 + 3) % 3;
+                const parent = await prisma.sheet.findUnique({
+                    where: { userId_level_year_period: { userId, level: 'phase', year: phaseStart, period: 0 } },
+                });
+                parentId = parent?.id || null;
+            } else if (level === 'quarter') {
+                const parent = await prisma.sheet.findUnique({
+                    where: { userId_level_year_period: { userId, level: 'year', year, period: 0 } },
+                });
+                parentId = parent?.id || null;
+            } else if (level === 'month') {
+                const quarter = Math.ceil(period / 4);
+                const parent = await prisma.sheet.findUnique({
+                    where: { userId_level_year_period: { userId, level: 'quarter', year, period: quarter } },
+                });
+                parentId = parent?.id || null;
+            } else if (level === 'week') {
+                const { month } = decodeWeekPeriod(period);
+                const parent = await prisma.sheet.findUnique({
+                    where: { userId_level_year_period: { userId, level: 'month', year, period: month } },
+                });
+                parentId = parent?.id || null;
+            }
+
+            sheet = await prisma.sheet.create({
+                data: { userId, level, year, period, parentId },
+                include: { cells: true },
             });
-            parentId = parent?.id || null;
+        }
+
+        // Get parent plan dynamically
+        let parentPlan = null;
+        let parentSheet = null;
+
+        if (level === 'phase') {
+            parentSheet = await prisma.sheet.findUnique({
+                where: { userId_level_year_period: { userId, level: 'life', year: 0, period: 0 } },
+                include: { cells: { where: { columnKey: 'indicator' } } },
+            });
         } else if (level === 'year') {
             const baseYear = new Date().getFullYear();
             const phaseStart = year - ((year - baseYear) % 3 + 3) % 3;
-            const parent = await prisma.sheet.findUnique({
+            parentSheet = await prisma.sheet.findUnique({
                 where: { userId_level_year_period: { userId, level: 'phase', year: phaseStart, period: 0 } },
+                include: { cells: { where: { columnKey: 'indicator' } } },
             });
-            parentId = parent?.id || null;
         } else if (level === 'quarter') {
-            const parent = await prisma.sheet.findUnique({
+            parentSheet = await prisma.sheet.findUnique({
                 where: { userId_level_year_period: { userId, level: 'year', year, period: 0 } },
+                include: { cells: { where: { columnKey: 'indicator' } } },
             });
-            parentId = parent?.id || null;
         } else if (level === 'month') {
             const quarter = Math.ceil(period / 4);
-            const parent = await prisma.sheet.findUnique({
+            parentSheet = await prisma.sheet.findUnique({
                 where: { userId_level_year_period: { userId, level: 'quarter', year, period: quarter } },
+                include: { cells: { where: { columnKey: 'indicator' } } },
             });
-            parentId = parent?.id || null;
         } else if (level === 'week') {
             const { month } = decodeWeekPeriod(period);
-            const parent = await prisma.sheet.findUnique({
+            parentSheet = await prisma.sheet.findUnique({
                 where: { userId_level_year_period: { userId, level: 'month', year, period: month } },
+                include: { cells: { where: { columnKey: 'indicator' } } },
             });
-            parentId = parent?.id || null;
         }
 
-        sheet = await prisma.sheet.create({
-            data: { userId, level, year, period, parentId },
-            include: { cells: true },
+        if (parentSheet) {
+            parentPlan = {
+                level: parentSheet.level,
+                label: getSheetLabel(parentSheet.level as SheetLevel, parentSheet.year, parentSheet.period),
+                plans: parentSheet.cells.map((c: { categoryId: string; content: string | null }) => ({
+                    categoryId: c.categoryId,
+                    content: c.content,
+                })),
+            };
+        }
+
+        // Get categories
+        const categories = await prisma.category.findMany({
+            orderBy: { sortOrder: 'asc' },
         });
+
+        // Get user birth year for age display
+        const profile = await prisma.userProfile.findUnique({
+            where: { userId },
+            select: { birthYear: true },
+        });
+
+        return NextResponse.json({ sheet, categories, parentPlan, birthYear: profile?.birthYear || null });
+    } catch (error) {
+        console.error('Sheet API error:', error);
+        return NextResponse.json({ error: 'Internal server error', detail: String(error) }, { status: 500 });
     }
-
-    // Get parent plan dynamically
-    let parentPlan = null;
-    let parentSheet = null;
-
-    if (level === 'phase') {
-        parentSheet = await prisma.sheet.findUnique({
-            where: { userId_level_year_period: { userId, level: 'life', year: 0, period: 0 } },
-            include: { cells: { where: { columnKey: 'indicator' } } },
-        });
-    } else if (level === 'year') {
-        const baseYear = new Date().getFullYear();
-        const phaseStart = year - ((year - baseYear) % 3 + 3) % 3;
-        parentSheet = await prisma.sheet.findUnique({
-            where: { userId_level_year_period: { userId, level: 'phase', year: phaseStart, period: 0 } },
-            include: { cells: { where: { columnKey: 'indicator' } } },
-        });
-    } else if (level === 'quarter') {
-        parentSheet = await prisma.sheet.findUnique({
-            where: { userId_level_year_period: { userId, level: 'year', year, period: 0 } },
-            include: { cells: { where: { columnKey: 'indicator' } } },
-        });
-    } else if (level === 'month') {
-        const quarter = Math.ceil(period / 4);
-        parentSheet = await prisma.sheet.findUnique({
-            where: { userId_level_year_period: { userId, level: 'quarter', year, period: quarter } },
-            include: { cells: { where: { columnKey: 'indicator' } } },
-        });
-    } else if (level === 'week') {
-        const { month } = decodeWeekPeriod(period);
-        parentSheet = await prisma.sheet.findUnique({
-            where: { userId_level_year_period: { userId, level: 'month', year, period: month } },
-            include: { cells: { where: { columnKey: 'indicator' } } },
-        });
-    }
-
-    if (parentSheet) {
-        parentPlan = {
-            level: parentSheet.level,
-            label: getSheetLabel(parentSheet.level as SheetLevel, parentSheet.year, parentSheet.period),
-            plans: parentSheet.cells.map((c: { categoryId: string; content: string | null }) => ({
-                categoryId: c.categoryId,
-                content: c.content,
-            })),
-        };
-    }
-
-    // Get categories
-    const categories = await prisma.category.findMany({
-        orderBy: { sortOrder: 'asc' },
-    });
-
-    // Get user birth year for age display
-    const profile = await prisma.userProfile.findUnique({
-        where: { userId },
-        select: { birthYear: true },
-    });
-
-    return NextResponse.json({ sheet, categories, parentPlan, birthYear: profile?.birthYear || null });
 }
