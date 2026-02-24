@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getSheetLabel, SheetLevel, decodeWeekPeriod } from '@/types/sheet';
 import { createClient } from '@/lib/supabase-server';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/sheet?level=week&year=2026&period=8
 export async function GET(req: NextRequest) {
     // Get authenticated user

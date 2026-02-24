@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase-server';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/cell — upsert a cell
 export async function POST(req: NextRequest) {
     // Verify authenticated user
