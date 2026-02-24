@@ -39,7 +39,7 @@ export default function JumpPage() {
                             label: `第${i + 1}週`,
                             level: 'week',
                             year,
-                            period: getWeekNumber(year, m, i + 1),
+                            period: getWeekPeriod(m, i + 1),
                         })),
                     })),
                 },
@@ -57,7 +57,7 @@ export default function JumpPage() {
                             label: `第${i + 1}週`,
                             level: 'week',
                             year,
-                            period: getWeekNumber(year, m, i + 1),
+                            period: getWeekPeriod(m, i + 1),
                         })),
                     })),
                 },
@@ -75,7 +75,7 @@ export default function JumpPage() {
                             label: `第${i + 1}週`,
                             level: 'week',
                             year,
-                            period: getWeekNumber(year, m, i + 1),
+                            period: getWeekPeriod(m, i + 1),
                         })),
                     })),
                 },
@@ -83,11 +83,8 @@ export default function JumpPage() {
         };
     }
 
-    function getWeekNumber(year: number, month: number, weekInMonth: number): number {
-        const firstDay = new Date(year, month - 1, (weekInMonth - 1) * 7 + 1);
-        const startOfYear = new Date(year, 0, 1);
-        const days = Math.floor((firstDay.getTime() - startOfYear.getTime()) / 86400000);
-        return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    function getWeekPeriod(month: number, weekInMonth: number): number {
+        return (month - 1) * 5 + weekInMonth;
     }
 
     function toggleExpand(path: string) {
@@ -106,7 +103,8 @@ export default function JumpPage() {
         router.push(`/sheet/${level}/${year}/${period}`);
     }
 
-    const years = [currentYear - 1, currentYear, currentYear + 1];
+    // Generate years from 2025 up to 2126
+    const years = Array.from({ length: 2126 - 2025 + 1 }, (_, i) => 2025 + i);
 
     function renderNode(node: FolderNode, path: string) {
         const isExpanded = expandedPaths.has(path);
