@@ -300,3 +300,43 @@
 .drill-down-button:active {
   transform: translateY(0);
 }
+
+/* Mobile Optimizations */
+@media (max-width: 1024px) {
+  .life-sheet-grid {
+    margin: 0 -16px 20px;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .grid-table {
+    min-width: 1000px;
+    /* Ensure horizontal scroll on mobile */
+  }
+
+  .parent-plan-cell,
+  .cell-content,
+  .cell-editor textarea {
+    font-size: 14px;
+    /* Slightly larger for readability on touch */
+  }
+
+  .category-cell {
+    width: 90px;
+    min-width: 90px;
+  }
+
+  .drill-down-bar {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .drill-down-button {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+}

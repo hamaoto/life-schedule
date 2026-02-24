@@ -6,10 +6,11 @@ import { createClient } from '@/lib/supabase-client';
 import './Sidebar.css';
 
 interface SidebarProps {
-    currentPath?: string;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
-export default function Sidebar({ currentPath }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const router = useRouter();
     const pathname = usePathname();
     const supabase = createClient();
@@ -24,7 +25,6 @@ export default function Sidebar({ currentPath }: SidebarProps) {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
-    const currentQuarter = Math.ceil(currentMonth / 4); // 1-4月=1, 5-8月=2, 9-12月=3
     // Month-based week: week of the current month (1-5)
     const currentWeekOfMonth = Math.min(Math.ceil(now.getDate() / 7), 5);
     const currentWeekPeriod = (currentMonth - 1) * 5 + currentWeekOfMonth;
@@ -34,10 +34,13 @@ export default function Sidebar({ currentPath }: SidebarProps) {
     }
 
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-brand">
                 <div className="sidebar-logo">📋</div>
                 <h1 className="sidebar-title">人生設計</h1>
+                <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
+                    ✕
+                </button>
             </div>
 
             <nav className="sidebar-nav">
