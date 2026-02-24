@@ -85,8 +85,28 @@ export default function SheetPage() {
 
     async function handleCellUpdate(cell: CellData) {
         if (!sheet) return;
+
+        // Capture current state for potential rollback
+        const previousCells = [...sheet.cells];
+
+        // 1. Optimistic Update (Immediate Feedback)
+        setSheet((prev) => {
+            if (!prev) return prev;
+            const existingIdx = prev.cells.findIndex(
+                (c) => c.categoryId === cell.categoryId && c.columnKey === cell.columnKey
+            );
+            const newCells = [...prev.cells];
+            if (existingIdx >= 0) {
+                newCells[existingIdx] = { ...newCells[existingIdx], ...cell };
+            } else {
+                newCells.push(cell);
+            }
+            return { ...prev, cells: newCells };
+        });
+
+        // 2. Background API Call
         try {
-            await fetch('/api/cell', {
+            const res = await fetch('/api/cell', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -97,21 +117,18 @@ export default function SheetPage() {
                     checked: cell.checked,
                 }),
             });
-            setSheet((prev) => {
-                if (!prev) return prev;
-                const existingIdx = prev.cells.findIndex(
-                    (c) => c.categoryId === cell.categoryId && c.columnKey === cell.columnKey
-                );
-                const newCells = [...prev.cells];
-                if (existingIdx >= 0) {
-                    newCells[existingIdx] = { ...newCells[existingIdx], ...cell };
-                } else {
-                    newCells.push(cell);
-                }
-                return { ...prev, cells: newCells };
-            });
+
+            if (!res.ok) {
+                throw new Error('Server returned an error');
+            }
         } catch (err) {
             console.error('Failed to save cell:', err);
+            // 3. Rollback on Error
+            setSheet((prev) => {
+                if (!prev) return prev;
+                return { ...prev, cells: previousCells };
+            });
+            alert('保存に失敗しました。以前の状態に戻します。');
         }
     }
 
