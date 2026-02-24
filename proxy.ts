@@ -33,6 +33,11 @@ export async function proxy(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    // Don't redirect API routes — just refresh session cookies
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        return supabaseResponse;
+    }
+
     // Allow access to login and signup pages
     const isAuthPage =
         request.nextUrl.pathname.startsWith('/login') ||
@@ -46,7 +51,10 @@ export async function proxy(request: NextRequest) {
 
     if (user && isAuthPage) {
         const url = request.nextUrl.clone();
-        url.pathname = '/sheet/week/' + new Date().getFullYear() + '/' + ((new Date().getMonth()) * 5 + Math.min(Math.ceil(new Date().getDate() / 7), 5));
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const weekPeriod = (month - 1) * 5 + Math.min(Math.ceil(now.getDate() / 7), 5);
+        url.pathname = `/sheet/week/${now.getFullYear()}/${weekPeriod}`;
         return NextResponse.redirect(url);
     }
 
@@ -55,6 +63,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|api).*)',
+        '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 };

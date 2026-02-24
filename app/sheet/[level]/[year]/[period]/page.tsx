@@ -54,6 +54,14 @@ export default function SheetPage() {
         setLoading(true);
         try {
             const res = await fetch(`/api/sheet?level=${level}&year=${year}&period=${period}`);
+            if (!res.ok) {
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                console.error('API error:', res.status);
+                return;
+            }
             const data = await res.json();
             setSheet(data.sheet);
             setCategories(data.categories);
