@@ -375,6 +375,10 @@
 
 /* Print Media Query */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 5mm;
+  }
 
   /* Hide all non-essential UI elements */
   header,
@@ -397,11 +401,12 @@
     background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
+    font-size: 11px !important;
   }
 
   .main-content {
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 0 !important;
     width: 100% !important;
   }
 
@@ -411,7 +416,7 @@
 
   .life-sheet-grid {
     box-shadow: none !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
     margin: 0 !important;
     width: 100% !important;
     border-radius: 0 !important;
@@ -435,7 +440,31 @@
 
   .grid-cell {
     height: auto !important;
-    min-height: 80px !important;
+    min-height: 40px !important;
+  }
+
+  .category-cell {
+    padding: 8px 10px !important;
+    min-height: 40px !important;
+  }
+
+  .cell-content {
+    padding: 6px 8px !important;
+    min-height: 40px !important;
+    font-size: 11px !important;
+  }
+
+  .category-name {
+    font-size: 12px !important;
+  }
+
+  .category-sub-name {
+    font-size: 9px !important;
+  }
+
+  .parent-plan-cell {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
   }
 
   /* Ensure page breaks don't happen inside rows if possible */
@@ -445,23 +474,34 @@
   }
 
   .page-header {
-    margin-bottom: 20px !important;
+    margin: 0 0 10px 0 !important;
     display: flex !important;
     justify-content: flex-start !important;
   }
 
   .page-title {
-    font-size: 24px !important;
+    font-size: 18px !important;
     color: #000000 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .page-subtitle {
+    font-size: 12px !important;
   }
 
   /* Show checkbox state in print */
   .checkbox-custom {
+    width: 16px !important;
+    height: 16px !important;
     border: 1px solid #000 !important;
   }
 
   input[type="checkbox"]:checked+.checkbox-custom {
     background: #475569 !important;
     -webkit-print-color-adjust: exact;
+  }
+
+  .checkbox-wrapper {
+    min-height: 40px !important;
   }
 }
