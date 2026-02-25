@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Header from '@/components/Header/Header';
+import MobileNotice from '@/components/MobileNotice/MobileNotice';
 import './AppShell.css';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     return (
         <div className={`app-layout ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+            <MobileNotice />
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
             {isSidebarOpen && <div className="sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />}
