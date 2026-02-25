@@ -267,15 +267,21 @@
   transform: rotate(45deg);
 }
 
-/* Drill Down Bar */
+/* Bottom Nav Bar (Drill down & Print) */
 .drill-down-bar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
   padding: 14px 16px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
+}
+
+.drill-down-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .drill-down-button {
@@ -299,6 +305,27 @@
 
 .drill-down-button:active {
   transform: translateY(0);
+}
+
+/* Print Button Styling */
+.print-button {
+  padding: 8px 16px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.print-button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 /* Mobile Optimizations */
@@ -329,8 +356,13 @@
   }
 
   .drill-down-bar {
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
     padding: 12px;
+  }
+
+  .drill-down-options {
+    justify-content: center;
   }
 
   .drill-down-button {
@@ -338,5 +370,98 @@
     min-width: 120px;
     padding: 10px 12px;
     text-align: center;
+  }
+}
+
+/* Print Media Query */
+@media print {
+
+  /* Hide all non-essential UI elements */
+  header,
+  .sidebar,
+  .sidebar-backdrop,
+  .app-header,
+  .main-header,
+  .tab-nav,
+  .period-nav,
+  .drill-down-bar,
+  .mobile-notice-overlay,
+  .loading-container,
+  button,
+  .page-header-left+* {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
+  body {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 20px !important;
+    width: 100% !important;
+  }
+
+  .app-layout {
+    display: block !important;
+  }
+
+  .life-sheet-grid {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+  }
+
+  .grid-table-wrapper {
+    overflow: visible !important;
+  }
+
+  .grid-table {
+    width: 100% !important;
+    table-layout: auto !important;
+  }
+
+  /* Force borders to show in PDF */
+  table,
+  th,
+  td {
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .grid-cell {
+    height: auto !important;
+    min-height: 80px !important;
+  }
+
+  /* Ensure page breaks don't happen inside rows if possible */
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .page-header {
+    margin-bottom: 20px !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .page-title {
+    font-size: 24px !important;
+    color: #000000 !important;
+  }
+
+  /* Show checkbox state in print */
+  .checkbox-custom {
+    border: 1px solid #000 !important;
+  }
+
+  input[type="checkbox"]:checked+.checkbox-custom {
+    background: #475569 !important;
+    -webkit-print-color-adjust: exact;
   }
 }

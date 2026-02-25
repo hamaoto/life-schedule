@@ -211,19 +211,22 @@ export default function LifeSheetGrid({
             </div>
 
             {/* Drill down buttons */}
-            {drillDownOptions && drillDownOptions.length > 0 && onDrillDown && (
-                <div className="drill-down-bar">
-                    {drillDownOptions.map((option, i) => (
+            <div className="drill-down-bar">
+                <div className="drill-down-options">
+                    {drillDownOptions?.map((option, i) => (
                         <button
                             key={i}
                             className="drill-down-button"
-                            onClick={() => onDrillDown(option)}
+                            onClick={() => onDrillDown?.(option)}
                         >
                             {option.label}
                         </button>
                     ))}
                 </div>
-            )}
+                <button className="print-button" onClick={() => window.print()}>
+                    <span className="print-icon">🖨️</span> PDFとして開く / 印刷
+                </button>
+            </div>
         </div>
     );
 }
