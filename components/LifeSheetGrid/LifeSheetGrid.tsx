@@ -47,6 +47,10 @@ export default function LifeSheetGrid({
     function handleCellClick(categoryId: string, col: ColumnDef) {
         if (col.type === 'checkbox') return;
         const cellKey = `${categoryId}-${col.key}`;
+
+        // If already editing this specific cell, don't reset content
+        if (editingCell === cellKey) return;
+
         const cell = getCellData(categoryId, col.key);
         setEditingCell(cellKey);
         setEditContent(cell.content || '');
