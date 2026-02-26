@@ -16,6 +16,7 @@ import {
     getSheetLabel,
     encodeWeekPeriod,
     decodeWeekPeriod,
+    getPhaseStartYear,
 } from '@/types/sheet';
 
 // Helper: get current date info
@@ -141,9 +142,10 @@ export default function SheetPage() {
 
         switch (level) {
             case 'life': {
-                // Life → 3-year phase buttons starting from current year
+                // Life → 3-year phase buttons starting from current year phase
+                const currentPhaseStart = getPhaseStartYear(now.year, birthYear);
                 return Array.from({ length: 5 }, (_, i) => {
-                    const phaseStart = now.year + i * 3;
+                    const phaseStart = currentPhaseStart + i * 3;
                     return {
                         label: `${phaseStart}-${phaseStart + 2}年を開く`,
                         level: 'phase' as SheetLevel,
@@ -208,7 +210,7 @@ export default function SheetPage() {
                 break;
             case 'phase':
                 // Phase containing current year
-                targetYear = now.year;
+                targetYear = getPhaseStartYear(now.year, birthYear);
                 targetPeriod = 0;
                 break;
             case 'year':

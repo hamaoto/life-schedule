@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSheetLabel, SheetLevel, decodeWeekPeriod } from '@/types/sheet';
+import { getSheetLabel, SheetLevel, decodeWeekPeriod, getPhaseStartYear } from '@/types/sheet';
 import { createClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -48,8 +48,7 @@ export async function GET(req: NextRequest) {
                 });
                 parentId = parent?.id || null;
             } else if (level === 'year') {
-                const baseYear = new Date().getFullYear();
-                const phaseStart = year - ((year - baseYear) % 3 + 3) % 3;
+                const phaseStart = getPhaseStartYear(year, profile?.birthYear || null);
                 const parent = await prisma.sheet.findUnique({
                     where: { userId_level_year_period: { userId, level: 'phase', year: phaseStart, period: 0 } },
                 });
@@ -89,8 +88,7 @@ export async function GET(req: NextRequest) {
                 include: { cells: { where: { columnKey: 'indicator' } } },
             });
         } else if (level === 'year') {
-            const baseYear = new Date().getFullYear();
-            const phaseStart = year - ((year - baseYear) % 3 + 3) % 3;
+            const phaseStart = getPhaseStartYear(year, profile?.birthYear || null);
             parentSheetPromise = prisma.sheet.findUnique({
                 where: { userId_level_year_period: { userId, level: 'phase', year: phaseStart, period: 0 } },
                 include: { cells: { where: { columnKey: 'indicator' } } },

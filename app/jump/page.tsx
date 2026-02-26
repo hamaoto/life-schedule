@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getPhaseStartYear, encodeWeekPeriod, getSheetLabel } from '@/types/sheet';
 import './jump.css';
 
 interface FolderNode {
@@ -14,77 +15,78 @@ interface FolderNode {
 
 export default function JumpPage() {
     const router = useRouter();
-    const currentYear = new Date().getFullYear();
-    const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+    const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set(['life-root', 'phases-root']));
+    const [birthYear, setBirthYear] = useState<number | null>(null);
 
-    // Build folder tree
-    function buildTree(year: number): FolderNode {
-        return {
-            label: `${year}年度`,
-            level: 'year',
-            year,
-            period: 0,
-            children: [
-                {
-                    label: '1-4月',
-                    level: 'quarter',
-                    year,
-                    period: 1,
-                    children: [1, 2, 3, 4].map((m) => ({
-                        label: `${m}月`,
-                        level: 'month',
-                        year,
-                        period: m,
-                        children: Array.from({ length: 5 }, (_, i) => ({
-                            label: `第${i + 1}週`,
-                            level: 'week',
-                            year,
-                            period: getWeekPeriod(m, i + 1),
-                        })),
-                    })),
-                },
-                {
-                    label: '5-8月',
-                    level: 'quarter',
-                    year,
-                    period: 2,
-                    children: [5, 6, 7, 8].map((m) => ({
-                        label: `${m}月`,
-                        level: 'month',
-                        year,
-                        period: m,
-                        children: Array.from({ length: 5 }, (_, i) => ({
-                            label: `第${i + 1}週`,
-                            level: 'week',
-                            year,
-                            period: getWeekPeriod(m, i + 1),
-                        })),
-                    })),
-                },
-                {
-                    label: '9-12月',
-                    level: 'quarter',
-                    year,
-                    period: 3,
-                    children: [9, 10, 11, 12].map((m) => ({
-                        label: `${m}月`,
-                        level: 'month',
-                        year,
-                        period: m,
-                        children: Array.from({ length: 5 }, (_, i) => ({
-                            label: `第${i + 1}週`,
-                            level: 'week',
-                            year,
-                            period: getWeekPeriod(m, i + 1),
-                        })),
-                    })),
-                },
-            ],
-        };
-    }
+    useEffect(() => {
+        fetch('/api/profile')
+            .then(res => res.json())
+            .then(data => {
+                if (data.profile) {
+                    setBirthYear(data.profile.birthYear);
+                }
+            })
+            .catch(err => console.error('Failed to fetch profile:', err));
+    }, []);
 
-    function getWeekPeriod(month: number, weekInMonth: number): number {
-        return (month - 1) * 5 + weekInMonth;
+    // Build year tree
+    function buildYearTree(year: number): FolderNode[] {
+        return [
+            {
+                label: '1-4月',
+                level: 'quarter',
+                year,
+                period: 1,
+                children: [1, 2, 3, 4].map((m) => ({
+                    label: `${m}月`,
+                    level: 'month',
+                    year,
+                    period: m,
+                    children: Array.from({ length: 5 }, (_, i) => ({
+                        label: `第${i + 1}週`,
+                        level: 'week',
+                        year,
+                        period: encodeWeekPeriod(m, i + 1),
+                    })),
+                })),
+            },
+            {
+                label: '5-8月',
+                level: 'quarter',
+                year,
+                period: 2,
+                children: [5, 6, 7, 8].map((m) => ({
+                    label: `${m}月`,
+                    level: 'month',
+                    year,
+                    period: m,
+                    children: Array.from({ length: 5 }, (_, i) => ({
+                        label: `第${i + 1}週`,
+                        level: 'week',
+                        year,
+                        period: encodeWeekPeriod(m, i + 1),
+                    })),
+                })),
+            },
+            {
+                label: '9-12月',
+                level: 'quarter',
+                year,
+                period: 3,
+                children: [9, 10, 11, 12].map((m) => ({
+                    label: `${m}月`,
+                    level: 'month',
+                    year,
+                    period: m,
+                    children: Array.from({ length: 5 }, (_, i) => ({
+                        label: `第${i + 1}週`,
+                        level: 'week',
+                        year,
+                        period: encodeWeekPeriod(m, i + 1),
+                    })),
+                })),
+            },
+        ];
     }
 
     function toggleExpand(path: string) {
@@ -103,8 +105,13 @@ export default function JumpPage() {
         router.push(`/sheet/${level}/${year}/${period}`);
     }
 
-    // Generate years from 2025 up to 2126
-    const years = Array.from({ length: 2126 - 2025 + 1 }, (_, i) => 2025 + i);
+    // Generate phases from 2025 up to 2100+
+    const startYear = 2025;
+    const endYear = 2101;
+    const phaseStarts: number[] = [];
+    for (let y = getPhaseStartYear(startYear, birthYear); y <= endYear; y += 3) {
+        phaseStarts.push(y);
+    }
 
     function renderNode(node: FolderNode, path: string) {
         const isExpanded = expandedPaths.has(path);
@@ -116,8 +123,7 @@ export default function JumpPage() {
                 <div className="folder-row">
                     <button
                         className="folder-label"
-                        onDoubleClick={() => hasChildren && toggleExpand(path)}
-                        onClick={() => !hasChildren && openSheet(node.level, node.year, node.period)}
+                        onClick={() => hasChildren ? toggleExpand(path) : openSheet(node.level, node.year, node.period)}
                     >
                         <span className="folder-icon">{icon}</span>
                         <span className="folder-name">{node.label}</span>
@@ -141,13 +147,37 @@ export default function JumpPage() {
     }
 
     return (
-        <div>
+        <div className="jump-page">
             <div className="page-header">
                 <h1 className="page-title">Jump</h1>
                 <p className="page-subtitle">フォルダ階層からシートを開く</p>
             </div>
+
             <div className="jump-tree">
-                {years.map((y) => renderNode(buildTree(y), `year-${y}`))}
+                {/* Life Plan Root */}
+                {renderNode({
+                    label: '人生設計 (全体像)',
+                    level: 'life',
+                    year: 0,
+                    period: 0
+                }, 'life-root')}
+
+                <div className="tree-divider">フェーズ別計画</div>
+
+                {/* Phases and Years */}
+                {phaseStarts.map((ps) => renderNode({
+                    label: `${ps}-${ps + 2}年フェーズ`,
+                    level: 'phase',
+                    year: ps,
+                    period: 0,
+                    children: [0, 1, 2].map(offset => ({
+                        label: `${ps + offset}年度`,
+                        level: 'year',
+                        year: ps + offset,
+                        period: 0,
+                        children: buildYearTree(ps + offset)
+                    }))
+                }, `phase-${ps}`))}
             </div>
         </div>
     );

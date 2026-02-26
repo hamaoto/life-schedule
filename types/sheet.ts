@@ -118,6 +118,16 @@ export function decodeWeekPeriod(period: number): { month: number; weekOfMonth: 
     return { month, weekOfMonth };
 }
 
+// Calculate the start year of a 3-year phase
+// Anchored to birthYear (or 0 if not set) to ensure stability over time
+export function getPhaseStartYear(year: number, birthYear: number | null): number {
+    const anchor = birthYear || 0;
+    const diff = year - anchor;
+    // Handle negative diff correctly
+    const phaseIndex = Math.floor(diff / 3);
+    return anchor + phaseIndex * 3;
+}
+
 // Generate sheet label
 export function getSheetLabel(level: SheetLevel, year: number, period: number): string {
     switch (level) {
