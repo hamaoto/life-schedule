@@ -45,6 +45,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             <nav className="sidebar-nav">
                 <div className="nav-section">
+                    <div className="nav-section-label">ナビゲーション</div>
+                    <button
+                        className={`nav-item ${isActive('/jump') ? 'active' : ''}`}
+                        onClick={() => router.push('/jump')}
+                    >
+                        <span className="nav-icon">📁</span>
+                        <span className="nav-text">Jump</span>
+                    </button>
+                </div>
+
+                <div className="nav-section">
                     <div className="nav-section-label">クイックアクセス</div>
                     <button
                         className={`nav-item ${isActive('/sheet/life/0/0') ? 'active' : ''}`}
@@ -77,14 +88,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
 
                 <div className="nav-section">
-                    <div className="nav-section-label">ナビゲーション</div>
-                    <button
-                        className={`nav-item ${isActive('/jump') ? 'active' : ''}`}
-                        onClick={() => router.push('/jump')}
-                    >
-                        <span className="nav-icon">📁</span>
-                        <span className="nav-text">Jump</span>
-                    </button>
+                    <div className="nav-section-label">資料・設定</div>
                     <button
                         className={`nav-item ${isActive('/doc') ? 'active' : ''}`}
                         onClick={() => router.push('/doc')}
