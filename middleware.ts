@@ -73,8 +73,9 @@ export async function middleware(request: NextRequest) {
         });
     }
 
-    if (user) {
-        // Redirect from landing/login/signup to dashboard (current week)
+    // Redirect from entry pages to dashboard (current week) for any user with a session (logged-in or guest)
+    const sessionOwner = user || guestId;
+    if (sessionOwner) {
         const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
             request.nextUrl.pathname.startsWith('/signup');
         const isLandingPage = request.nextUrl.pathname === '/' ||
