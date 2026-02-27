@@ -71,11 +71,11 @@ export interface ParentPlanData {
 
 // PDCA columns — used for ALL levels
 export const PDCA_COLUMNS: ColumnDef[] = [
-    { key: 'plan', label: 'P', group: '計画', type: 'text', width: '30%' },
-    { key: 'indicator', label: 'KPI', group: '計画', type: 'text', width: '20%' },
-    { key: 'do', label: 'D', group: '振り返り', type: 'checkbox', width: '5%' },
-    { key: 'check', label: 'C', group: '振り返り', type: 'checkbox', width: '5%' },
-    { key: 'action', label: 'A', group: '振り返り', type: 'text', width: '20%' },
+    { key: 'plan', label: 'Plan', group: '計画', type: 'text', width: '30%' },
+    { key: 'indicator', label: 'Plan(Metrics)', group: '計画', type: 'text', width: '20%' },
+    { key: 'do', label: 'Do', group: '振り返り', type: 'checkbox', width: '5%' },
+    { key: 'check', label: 'Check', group: '振り返り', type: 'checkbox', width: '5%' },
+    { key: 'action', label: 'Action', group: '振り返り', type: 'text', width: '20%' },
 ];
 
 // Level labels
