@@ -1,10 +1,19 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { encodeWeekPeriod } from '@/types/sheet';
 import './Landing.css';
 
 export default function LandingPage() {
     const router = useRouter();
+
+    const handleStartNow = () => {
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const weekOfMonth = Math.min(Math.ceil(now.getDate() / 7), 5);
+        const weekPeriod = encodeWeekPeriod(month, weekOfMonth);
+        router.push(`/sheet/week/${now.getFullYear()}/${weekPeriod}`);
+    };
 
     return (
         <div className="landing-container">
@@ -13,7 +22,7 @@ export default function LandingPage() {
                 <div className="nav-logo">📋 人生設計シート</div>
                 <div className="nav-actions">
                     <button className="btn-secondary" onClick={() => router.push('/login')}>ログイン</button>
-                    <button className="btn-primary" onClick={() => router.push('/signup')}>無料で始める</button>
+                    <button className="btn-primary" onClick={handleStartNow}>まずは使ってみる</button>
                 </div>
             </nav>
 
@@ -30,8 +39,8 @@ export default function LandingPage() {
                         最強の自己管理ツール。
                     </p>
                     <div className="hero-cta">
-                        <button className="btn-primary btn-large" onClick={() => router.push('/signup')}>
-                            今すぐ人生を設計する
+                        <button className="btn-primary btn-large" onClick={handleStartNow}>
+                            今すぐPDCAを始める
                         </button>
                     </div>
                 </div>
@@ -93,8 +102,8 @@ export default function LandingPage() {
                 <div className="cta-card">
                     <h2>「なんとなく」の毎日を、卒業しよう。</h2>
                     <p>管理されるのではなく、管理する人生へ。</p>
-                    <button className="btn-white" onClick={() => router.push('/signup')}>
-                        アカウントを作成する（無料）
+                    <button className="btn-white" onClick={handleStartNow}>
+                        今すぐ計画を立てる（登録不要）
                     </button>
                 </div>
             </section>
