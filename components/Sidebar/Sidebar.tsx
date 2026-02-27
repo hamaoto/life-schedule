@@ -15,10 +15,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
     const supabase = createClient();
     const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [guestId, setGuestId] = useState<string | null>(null);
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data: { user } }) => {
             setUserEmail(user?.email || null);
+            if (!user) {
+                const cookies = document.cookie.split('; ');
+                const guestIdCookie = cookies.find(row => row.startsWith('guest-id='));
+                if (guestIdCookie) {
+                    setGuestId(guestIdCookie.split('=')[1]);
+                }
+            }
         });
     }, []);
 
@@ -126,9 +134,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         </>
                     ) : (
                         <>
-                            <div className="account-email">
-                                <span className="account-icon">👤</span>
-                                <span className="account-text">ゲストユーザー</span>
+                            <div className="guest-info">
+                                <span className="nav-icon">👤</span>
+                                <div className="guest-details">
+                                    <span className="nav-text">ゲストモード</span>
+                                    <span className="guest-id">#{guestId ? guestId.substring(0, 8) : '...'}</span>
+                                </div>
                             </div>
                             <button
                                 className="nav-item sync-button"

@@ -104,35 +104,37 @@
     padding-top: 12px;
 }
 
-.account-email {
+.account-email,
+.guest-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+    gap: 10px;
+    padding: 10px 12px;
     margin-bottom: 4px;
 }
 
-.account-icon {
-    font-size: 14px;
-    flex-shrink: 0;
+.guest-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
 }
 
-.account-text {
-    font-size: 12px;
-    color: #64748b;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.guest-id {
+    font-size: 11px;
+    color: #94a3b8;
+    font-family: monospace;
 }
 
-.logout-button {
-    color: #94a3b8 !important;
-    font-size: 13px !important;
+.sync-button {
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    margin-top: 8px;
+    border: 1px dashed #bfdbfe !important;
 }
 
-.logout-button:hover {
-    color: #ef4444 !important;
-    background: #fef2f2 !important;
+.sync-button:hover {
+    background: #dbeafe !important;
 }
 
 .sidebar-close-btn {

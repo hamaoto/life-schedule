@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
         supabaseResponse.cookies.set(GUEST_ID_COOKIE, newGuestId, {
             path: '/',
             maxAge: 60 * 60 * 24 * 365, // 1 year
-            httpOnly: true,
+            httpOnly: false, // Allow client-side detection for SyncModal
             sameSite: 'lax',
         });
     }
