@@ -2,20 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSheetLabel, SheetLevel, decodeWeekPeriod, getPhaseStartYear } from '@/types/sheet';
 import { createClient } from '@/lib/supabase-server';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 // GET /api/sheet?level=week&year=2026&period=8
 export async function GET(req: NextRequest) {
     try {
-        // Get authenticated user
+        // Get authenticated user or guest ID
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) {
-            console.error('Auth error:', authError?.message || 'No user');
-            return NextResponse.json({ error: 'Unauthorized', detail: authError?.message }, { status: 401 });
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const cookieStore = await cookies();
+        const guestId = cookieStore.get('guest-id')?.value;
+
+        if (!user && !guestId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const userId = user.id;
+
+        const userId = user?.id || guestId!;
 
         const { searchParams } = new URL(req.url);
         const level = (searchParams.get('level') || 'week') as SheetLevel;

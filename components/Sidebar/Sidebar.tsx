@@ -106,23 +106,46 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
 
                 <div className="nav-section account-section">
-                    {userEmail && (
-                        <div className="account-email" title={userEmail}>
-                            <span className="account-icon">👤</span>
-                            <span className="account-text">{userEmail}</span>
-                        </div>
+                    {userEmail ? (
+                        <>
+                            <div className="account-email" title={userEmail}>
+                                <span className="account-icon">👤</span>
+                                <span className="account-text">{userEmail}</span>
+                            </div>
+                            <button
+                                className="nav-item logout-button"
+                                onClick={async () => {
+                                    await supabase.auth.signOut();
+                                    router.push('/login');
+                                    router.refresh();
+                                }}
+                            >
+                                <span className="nav-icon">門</span>
+                                <span className="nav-text">ログアウト</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <div className="account-email">
+                                <span className="account-icon">👤</span>
+                                <span className="account-text">ゲストユーザー</span>
+                            </div>
+                            <button
+                                className="nav-item sync-button"
+                                onClick={() => router.push('/signup')}
+                            >
+                                <span className="nav-icon">✨</span>
+                                <span className="nav-text">同期のために登録</span>
+                            </button>
+                            <button
+                                className="nav-item login-button-sidebar"
+                                onClick={() => router.push('/login')}
+                            >
+                                <span className="nav-icon">🔑</span>
+                                <span className="nav-text">ログイン</span>
+                            </button>
+                        </>
                     )}
-                    <button
-                        className="nav-item logout-button"
-                        onClick={async () => {
-                            await supabase.auth.signOut();
-                            router.push('/login');
-                            router.refresh();
-                        }}
-                    >
-                        <span className="nav-icon">🚪</span>
-                        <span className="nav-text">ログアウト</span>
-                    </button>
                 </div>
             </nav>
         </aside>
