@@ -132,17 +132,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             </div>
                             <button
                                 className="nav-item sync-button"
-                                onClick={() => router.push('/signup')}
-                            >
-                                <span className="nav-icon">✨</span>
-                                <span className="nav-text">同期のために登録</span>
-                            </button>
-                            <button
-                                className="nav-item login-button-sidebar"
                                 onClick={() => router.push('/login')}
                             >
-                                <span className="nav-icon">🔑</span>
-                                <span className="nav-text">ログイン</span>
+                                <span className="nav-icon">✨</span>
+                                <span className="nav-text">ログインまたは登録</span>
                             </button>
                         </>
                     )}
